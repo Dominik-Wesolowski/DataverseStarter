@@ -1,0 +1,54 @@
+# .NET / MSBuild outputs
+**/bin/
+**/obj/
+/artifacts/
+/packages/
+/local-feed/
+*.binlog
+
+# IDE local state
+.vs/
+.idea/
+*.user
+*.suo
+*.sln.docstates
+*.DotSettings.user
+
+# Test results / coverage
+TestResults/
+coverage/
+*.trx
+*.coverage
+*.coveragexml
+
+# Node.js dependencies and logs
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Local configuration and credentials
+.env
+.env.*
+!.env.example
+!.env.template
+*.local.json
+*.local.props
+*.snk
+*.pfx
+*.p12
+
+# Temporary files and logs
+*.log
+*.tmp
+*.bak
+*.orig
+*.rej
+
+# Operating system
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Keep package lockfiles, shared IDE configuration, early-bound models
+# and the generated PAC runtime under version control.

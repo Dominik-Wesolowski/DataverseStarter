@@ -1,0 +1,22 @@
+<Project>
+  <Target Name="MergePlugin" AfterTargets="Build" Condition="'$(MergePlugin)' == 'true'">
+    <PropertyGroup><PluginArtifactDir>$(RepositoryRoot)artifacts/plugins/$(Configuration)/</PluginArtifactDir></PropertyGroup>
+    <ItemGroup>
+      <PluginMergeInput Include="$(TargetPath)" />
+      <PluginMergeInput Include="$(TargetDir)Company.Crm.Application.dll" />
+      <PluginMergeInput Include="$(TargetDir)Company.Crm.EarlyBound.dll" />
+      <PluginMergeInput Include="$(TargetDir)Microsoft.Extensions.DependencyInjection.dll" />
+      <PluginMergeInput Include="$(TargetDir)Microsoft.Extensions.DependencyInjection.Abstractions.dll" />
+      <PluginMergeInput Include="$(TargetDir)Microsoft.Bcl.AsyncInterfaces.dll" />
+      <PluginMergeInput Include="$(TargetDir)System.Threading.Tasks.Extensions.dll" />
+      <PluginMergeInput Include="$(TargetDir)System.Runtime.CompilerServices.Unsafe.dll" />
+      <PluginMergeSearchPath Include="$(TargetDir)" />
+      <PluginMergeSearchPath Include="@(ReferencePath->'%(RootDir)%(Directory)')" />
+    </ItemGroup>
+    <MakeDir Directories="$(PluginArtifactDir)" />
+    <Error Condition="!Exists('$(AssemblyOriginatorKeyFile)')" Text="Missing signing key. Run npm run plugins:init." />
+    <ILRepack InputAssemblies="@(PluginMergeInput)" LibraryPath="@(PluginMergeSearchPath)"
+              OutputFile="$(PluginArtifactDir)$(AssemblyName).dll" KeyFile="$(AssemblyOriginatorKeyFile)"
+              Internalize="false" DebugInfo="true" Parallel="false" TargetKind="Dll" />
+  </Target>
+</Project>

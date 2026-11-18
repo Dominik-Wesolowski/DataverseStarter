@@ -1,0 +1,7 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup><PackageReference Include="Microsoft.CrmSdk.CoreAssemblies" /></ItemGroup>
+  <ItemGroup>
+    <Folder Include="Generated\Entities\" />
+    <Folder Include="Generated\OptionSets\" />
+  </ItemGroup>
+</Project>

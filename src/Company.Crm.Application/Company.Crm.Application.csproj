@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="../Company.Crm.EarlyBound/Company.Crm.EarlyBound.csproj" />
+    <PackageReference Include="Microsoft.CrmSdk.CoreAssemblies" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(IncludeAccountExample)' != 'true'">
+    <Compile Remove="Entities/Accounts/**/*.cs" />
+  </ItemGroup>
+</Project>

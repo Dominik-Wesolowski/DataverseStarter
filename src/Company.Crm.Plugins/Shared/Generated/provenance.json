@@ -1,0 +1,7 @@
+﻿{
+    "generator":  "Microsoft Power Platform CLI",
+    "command":  "pac plugin init --outputDirectory \u003ctemporary\u003e/Company.Crm.Plugins --author Company --skip-signing",
+    "file":  "PluginBase.cs",
+    "sha256":  "A3466BB007BF86CFEE75597530B6DD7315A23699FF621709AACF68F9515F4AF9",
+    "policy":  "Unmodified generator output. Template extensions are outside Generated."
+}

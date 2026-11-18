@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup><TargetFramework>net472</TargetFramework><IsTestProject>true</IsTestProject></PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="xunit" />
+    <PackageReference Include="xunit.runner.visualstudio" PrivateAssets="all" />
+    <PackageReference Include="Moq" />
+    <ProjectReference Include="../../src/Company.Crm.Application/Company.Crm.Application.csproj" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(IncludeAccountExample)' != 'true'">
+    <Compile Remove="Entities/Accounts/**/*.cs" />
+  </ItemGroup>
+</Project>

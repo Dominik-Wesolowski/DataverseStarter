@@ -1,0 +1,25 @@
+{
+  "suppressINotifyPattern": false,
+  "suppressGeneratedCodeAttribute": false,
+  "language": "CS",
+  "namespace": "Company.Crm.EarlyBound.Generated",
+  "generateSdkMessages": false,
+  "generateGlobalOptionSets": false,
+  "emitFieldsClasses": true,
+  "entityTypesFolder": "Entities",
+  "messagesTypesFolder": "Messages",
+  "optionSetsTypesFolder": "OptionSets",
+  "optionChoicesTypesFolder": "OptionChoices",
+  "entityNamesFilter": [
+    "businessunit",
+    "systemuser",
+    "account",
+    "contact",
+    "lead",
+    "task"
+  ],
+  "messageNamesFilter": [],
+  "emitEntityETC": false,
+  "emitVirtualAttributes": true,
+  "serviceContextName": "CrmServiceContext"
+}

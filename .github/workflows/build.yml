@@ -1,0 +1,38 @@
+name: Build and template verification
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: latest
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install PAC CLI
+        run: dotnet tool install --global Microsoft.PowerApps.CLI.Tool --version 2.13.1
+      - name: Initialize local runtime and signing key
+        run: npm run setup
+      - name: Build, test and validate merged artifact
+        run: npm run check
+      - name: Verify renamed template output
+        if: hashFiles('.template.config/template.json') != ''
+        shell: powershell
+        run: ./scripts/TestTemplate.ps1
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: artifacts/**/*.trx
+          if-no-files-found: ignore

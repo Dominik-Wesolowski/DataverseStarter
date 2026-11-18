@@ -1,0 +1,16 @@
+{
+  "plugins": [
+    {
+      "profile": "default,debug",
+      "assemblypath": "../../artifacts/plugins/Debug/Company.Crm.Plugins.dll",
+      "excludePluginSteps": false,
+      "classRegex": "((public( sealed)? class (?'class'[\\w]*)[\\W]*?)((?'plugin':[\\W]*?((IPlugin)|(PluginBase)|(Plugin)))|(?'wf':[\\W]*?CodeActivity)))"
+    },
+    {
+      "profile": "release",
+      "assemblypath": "../../artifacts/plugins/Release/Company.Crm.Plugins.dll",
+      "excludePluginSteps": false,
+      "classRegex": "((public( sealed)? class (?'class'[\\w]*)[\\W]*?)((?'plugin':[\\W]*?((IPlugin)|(PluginBase)|(Plugin)))|(?'wf':[\\W]*?CodeActivity)))"
+    }
+  ]
+}

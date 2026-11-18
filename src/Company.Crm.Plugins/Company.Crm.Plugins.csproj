@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <ILRepackTargetsFile>$(RepositoryRoot)build\Plugin.Merge.targets</ILRepackTargetsFile>
+    <AssemblyOriginatorKeyFile>$(RepositoryRoot)build\Plugin.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../Company.Crm.Application/Company.Crm.Application.csproj" />
+    <ProjectReference Include="../Company.Crm.EarlyBound/Company.Crm.EarlyBound.csproj" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
+    <PackageReference Include="Microsoft.CrmSdk.CoreAssemblies" />
+    <PackageReference Include="ILRepack.Lib.MSBuild.Task" PrivateAssets="all" />
+    <PackageReference Include="spkl" PrivateAssets="all" GeneratePathProperty="true" />
+  </ItemGroup>
+  <Target Name="WriteSpklLocation" AfterTargets="Build">
+    <MakeDir Directories="$(RepositoryRoot)artifacts/tools" />
+    <WriteLinesToFile File="$(RepositoryRoot)artifacts/tools/spkl.path" Lines="$(Pkgspkl)\tools\spkl.exe" Overwrite="true" />
+  </Target>
+  <Target Name="RequireGeneratedRuntime" BeforeTargets="CoreCompile">
+    <Error Condition="!Exists('$(MSBuildProjectDirectory)/Shared/Generated/PluginBase.cs')"
+           Text="PAC runtime is missing. Run npm run setup from the solution root." />
+  </Target>
+  <ItemGroup Condition="'$(IncludeAccountExample)' != 'true'">
+    <Compile Remove="Entities/Accounts/**/*.cs" />
+  </ItemGroup>
+  <Target Name="RequireAccountModel" BeforeTargets="CoreCompile" Condition="'$(IncludeAccountExample)' == 'true'">
+    <Error Condition="!Exists('$(MSBuildProjectDirectory)/../Company.Crm.EarlyBound/Generated/Entities/account.cs')"
+           Text="Account model is missing. Restore the minimal template model or run npm run model:generate for the target environment." />
+  </Target>
+</Project>

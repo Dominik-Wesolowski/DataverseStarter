@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+    <IsTestProject>true</IsTestProject>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="xunit" />
+    <PackageReference Include="xunit.runner.visualstudio" PrivateAssets="all" />
+    <PackageReference Include="Moq" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TestMergedArtifact)' != 'true'">
+    <ProjectReference Include="../../src/Company.Crm.Plugins/Company.Crm.Plugins.csproj" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TestMergedArtifact)' != 'true'">
+    <Compile Remove="Shared/MergedArtifactTests.cs" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TestMergedArtifact)' == 'true'">
+    <PackageReference Include="Microsoft.CrmSdk.CoreAssemblies" />
+    <Reference Include="Company.Crm.Plugins">
+      <HintPath>$(RepositoryRoot)artifacts/plugins/$(Configuration)/Company.Crm.Plugins.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+  </ItemGroup>
+  <Target Name="RequireMergedArtifact" BeforeTargets="ResolveReferences"
+          Condition="'$(TestMergedArtifact)' == 'true'">
+    <Error Condition="!Exists('$(RepositoryRoot)artifacts/plugins/$(Configuration)/Company.Crm.Plugins.dll')"
+           Text="Run npm run build before npm run test:artifact." />
+  </Target>
+  <ItemGroup Condition="'$(IncludeAccountExample)' != 'true'">
+    <Compile Remove="Entities/Accounts/**/*.cs" />
+  </ItemGroup>
+</Project>
