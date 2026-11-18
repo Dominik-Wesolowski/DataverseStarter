@@ -1,30 +1,163 @@
-# Company.Crm
+# Dataverse Starter
 
-Dataverse Starter with Sparkle (spkl), ILRepack, PAC generators and automatic DI.
+**Start with business logic. Keep the plugin plumbing ready.**
 
-## Build output
+A reusable .NET template for Microsoft Dataverse plugins: typed execution context,
+automatic dependency injection, Sparkle deployment and a signed, merged assembly
+from a single build command.
 
-`npm run build` builds the solution, merges and signs the plugin, then validates the final DLL.
-The PRT artifact is `artifacts/plugins/Debug/Company.Crm.Plugins.dll`.
-Debug is the default. Use `npm run build:release` for Release.
-The build does not generate a signing key. Run `npm run setup` once before the first build.
+Create a project under your own name, add your entities and services, and build a DLL
+ready for Plugin Registration Tool. No company-specific configuration or CRM credentials included.
 
-## Start
+## What you get
 
-Prerequisites: Windows, the latest installed .NET SDK, Node.js/npm and Power Platform CLI (pac).
-Use the .NET Framework targeting dependencies restored by the solution.
+- **PAC-generated foundation** — the original Microsoft PluginBase stays unmodified; a thin wrapper adds typed context and scoped DI.
+- **One build, one deployment assembly** — ILRepack merges application and DI dependencies, signs the DLL and validates the result. Microsoft SDK assemblies remain external.
+- **Entity-first structure** — plugins, services and repositories have predictable homes under Entities; reusable code lives under Shared.
+- **Automatic service registration** — matching interfaces and implementations are discovered by convention.
+- **Tests through the entry point** — exercise IPlugin.Execute, guards, real DI, services and repositories with a mocked Dataverse boundary.
+- **An optional Account example** — Create/Update plugins, service, repository, minimal OOTB model and tests.
+
+## Create your project
+
+You need Windows, a current .NET SDK, Node.js/npm and Power Platform CLI (`pac`).
+Plugins target .NET Framework 4.6.2; tests target 4.7.2. The SDK version is not pinned.
+
+Clone this repository, then install the local template from its root:
 
 ```powershell
+dotnet new install .
+```
+
+Create a clean project:
+
+```powershell
+dotnet new dataverse-starter -n XYZ -o D:\XYZ
+```
+
+Or include the working Account example:
+
+```powershell
+dotnet new dataverse-starter -n XYZ -o D:\XYZ --include-account-example
+```
+
+The name is yours: `XYZ` produces `XYZ.sln`, `XYZ.Plugins`, `XYZ.Application`
+and `XYZ.EarlyBound`. Use `XYZ.Crm` if you want that prefix instead.
+
+```powershell
+cd D:\XYZ
 npm run setup
 npm run check
 ```
 
-setup creates a local signing key and generates the untouched Microsoft plugin runtime
-through pac plugin init. No CRM connection is needed for setup or framework tests.
-The runtime manifest records the SHA-256 of the actual generator output.
+`setup` creates the local signing key if missing and generates the original runtime with
+`pac plugin init`. Setup and local tests do not require a CRM connection.
+Build does not create a key automatically: run setup before your first build.
+Keep the signing key stable once an assembly has been deployed; it is ignored by Git.
 
-The optional Account example includes a minimal OOTB model for tests and builds offline.
-When connecting a real project, select the target PAC profile and replace the sample model:
+To update the installed template after editing this source repository:
+
+```powershell
+dotnet new install . --force
+```
+
+## Everyday commands
+
+| Command | Purpose |
+| --- | --- |
+| `npm run setup` | Initialize signing and generate the PAC runtime. |
+| `npm run build` | Build **Debug**, merge, sign and validate the plugin DLL. |
+| `npm run build:release` | Build and validate **Release** explicitly. |
+| `npm test` | Run application and plugin tests in Debug. |
+| `npm run test:artifact` | Run plugin tests against the merged Debug DLL; build first. |
+| `npm run check` | Build, run source tests and test the merged DLL. |
+| `npm run model:generate` | Generate early-bound models from the active PAC environment. |
+| `npm run plugins:register` | Register the Debug assembly and steps using Sparkle. |
+| `npm run runtime:generate` | Regenerate the original PAC runtime and its provenance manifest. |
+| `npm run plugins:init` | Create a signing key only if missing; also called by setup. |
+
+## Your deployment DLL
+
+After `npm run build`, select this file in Plugin Registration Tool:
+
+```text
+artifacts/plugins/Debug/XYZ.Plugins.dll
+```
+
+Release output goes to `artifacts/plugins/Release/XYZ.Plugins.dll`.
+In this template source, the assembly prefix is `Company.Crm`.
+
+For Sparkle registration:
+
+```powershell
+npm run plugins:register
+# After npm run build:release:
+npm run plugins:register -- /p:release
+```
+
+Sparkle manages its own authentication. It does not reuse the active PAC login.
+Neither setup nor check deploys anything.
+
+## Project layout
+
+```text
+src/
+  XYZ.Plugins/
+    Entities/Accounts/         Plugin entry points
+    Shared/                   Context, bases, guards, DI and registration
+  XYZ.Application/
+    Entities/Accounts/
+      Service/                Business logic and its interface
+      Repository/             Dataverse queries and their interface
+    Shared/                   Service base, entity helpers and configuration
+  XYZ.EarlyBound/
+    Generated/                Replaceable early-bound models
+    builderSettings.json      PAC model generation settings
+tests/
+  XYZ.Application.Tests/
+  XYZ.Plugins.Tests/
+scripts/                      Setup, generation, deployment and validation
+build/                        Merge configuration and local signing key
+```
+
+Account folders are included only when requested. To add a feature, follow the same
+`Entities/<Entity>/Service` and `Repository` layout. Public concrete classes in those
+Application namespaces are registered as scoped services through a matching
+`I<ClassName>` interface in the same namespace. Missing contracts fail explicitly.
+
+## Writing plugins
+
+Declare the entity type once. The inherited PluginContext provides the typed target:
+
+```csharp
+public sealed class PreCreateAccountPlugin()
+    : PluginBase<Account>(typeof(PreCreateAccountPlugin))
+{
+    protected override void Execute(PluginContext context)
+    {
+        context.Get<IAccountService>().NormalizeAccountName(context.TargetEntity);
+    }
+}
+```
+
+Add the Sparkle registration attribute and guards for your step; the optional Account
+example shows the complete registration. The non-generic Shared.PluginBase also supports
+EntityReference targets and Custom APIs.
+
+Write PreOperation changes to TargetEntity. FullTargetEntity is a merged reading snapshot
+(PreImage → Target → PostImage), with explicit nulls taking precedence. Required named
+images have dedicated accessors. IsChanged requires a preimage outside Create.
+Never store invocation state on a plugin instance: Dataverse can reuse it concurrently.
+
+Shared helpers include required and aliased attribute reads, effective values, selected-field
+patches and typed environment-variable reads. Configuration caching is scoped to one reader
+instance. BuildPatch performs no SDK operation: provide an independent baseline with the
+compared columns loaded, and skip Update when the patch has no attributes.
+ServiceBase exposes explicit paging rather than an unbounded retrieve-all loop.
+
+## Generate real models
+
+Review `src/XYZ.EarlyBound/builderSettings.json`, then choose the target PAC profile:
 
 ```powershell
 pac auth list
@@ -32,103 +165,29 @@ pac auth select --index <profile-index>
 npm run model:generate
 ```
 
-The generator reads metadata from the active PAC environment. Review builderSettings.json
-before generation. PAC intentionally overwrites Generated/Entities/account.cs and generates
-the remaining target-environment models. The initial Account is only a test/example model,
-not full environment metadata. Template validation rejects exporting a full environment model.
+The optional Account model is a minimal example for offline builds and tests.
+PAC intentionally overwrites it with metadata from your environment.
+Review generated files before committing them.
 
-## Structure
+## Testing
 
-- src/Company.Crm.Application: Entities for services/repositories; Shared for bases and environment variables.
-- src/Company.Crm.EarlyBound: PAC model settings and replaceable early-bound entity models.
-- src/Company.Crm.Plugins: Entities for plugins; Shared for bases, context, DI, extensions and registration.
-- tests: application and plugin tests, including tests against the merged assembly.
-- scripts and build: generation, signing, Sparkle launcher and ILRepack configuration.
+Focused unit tests cover services and helpers. PluginScenario runs the public plugin
+entry point with the generated runtime, registration guards and real application composition.
+Inspect Target snapshots, traces, outputs, shared variables and SDK calls, including failures.
+Only the platform boundary is mocked. These tests do not emulate server-side transactions,
+rollback, security or automatic step dispatch; verify those behaviors in Dataverse.
 
-Application/Entities/<Entity>/Service and Repository use matching I<ClassName> interfaces.
-The DI scanner registers matching implementations automatically within the Application assembly.
-
-## Plugins
-
-Declare the entity type once in PluginBase<Account>. Its inherited PluginContext binds Account:
-
-```csharp
-protected override void Execute(PluginContext context)
-{
-    var target = context.TargetEntity; // Account
-}
-```
-
-PluginContext exposes Context, OrgService, lazy OrgServiceAdmin, target and images,
-FullTargetEntity, typed input parameters, shared variables and Get<T>() for scoped DI.
-FullTarget merges PreImage -> Target -> PostImage and copies common mutable SDK column values.
-It is not a universal deep clone of specialized objects.
-Write PreOperation changes to TargetEntity. An explicit null overrides the previous value.
-Images are optional unless required explicitly. IsChanged compares multi-select choices as sets,
-binary values by content and lookup identities without display labels. IsChanged requires PreImage outside Create.
-Do not store per-invocation state on a plugin instance: Dataverse may reuse it concurrently.
-PluginBase without an entity type supports EntityReference targets and Custom APIs.
-
-Source builds default to IncludeAccountExample=false. The minimal model allows offline example tests:
-dotnet test DataverseStarter.sln -c Debug -p:IncludeAccountExample=true.
-An instantiated --include-account-example project enables it by default.
-
-The optional Account feature is a demonstration that normalizes account names; it is not
-included in the default template output. Replace it with actual business requirements.
-
-## Commands
+The source template can also verify both generated project variants locally:
 
 ```powershell
-npm run build
-npm test
-npm run build:release
-npm run test:artifact
-npm run check
+powershell.exe -NoProfile -File scripts/TestTemplate.ps1
 ```
 
-check builds, tests, merges the signed plugin DLL and tests the merged artifact.
-Output: artifacts/plugins/Debug/Company.Crm.Plugins.dll.
-SDK assemblies remain external; application and DI dependencies are merged.
+This source-only script is excluded from generated projects. No hosted CI workflow is included.
 
-Registration uses Sparkle and is an explicit deployment action:
+## Acknowledgements
 
-```powershell
-npm run plugins:register
-npm run plugins:register -- /p:release
-```
-
-Sparkle manages its own authentication; it does not inherit PAC's active login.
-model:generate uses PAC's active profile. Neither setup nor check deploys anything.
-Do not commit credentials or the local build/Plugin.snk key. Keep the key stable
-for a deployed assembly's identity and provision it separately in CI.
-
-## New company or solution
-
-Install the source template, then create a separate project with dotnet new dataverse-starter
-and a namespace-safe name. See the source repository's docs/TemplateAuthoring.md.
-The generated solution already contains its final names; do not rename projects manually.
-
-The execution API is inspired by https://github.com/Dominik-Wesolowski/CrmBasePluginFramework.
-See docs/Architecture.md and docs/CrmBasePluginFramework-LICENSE.txt.
-
-## Explicit paging
-
-ServiceBase.RetrievePage<TEntity>(query) returns Records, MoreRecords and PagingCookie.
-The caller sets the next query.PageInfo.PagingCookie and increments PageNumber explicitly.
-No automatic unbounded reads run inside a synchronous plugin.
-
-## Validation
-
-The Windows CI workflow runs setup and check without deploying. Both template variants
-can build offline; the Account variant ships its minimal test model. The template source
-also runs scripts/TestTemplate.ps1 in an isolated dotnet hive. See docs/Audit.md in the source
-repository for audit decisions and remaining sandbox validation.
-
-Direct inheritance: Shared.PluginBase inherits the original PAC PluginBase.
-There is no adapter or second IPlugin.Execute implementation. Concrete plugins pass their type
-with a short constructor, e.g. public MyPlugin() : base(typeof(MyPlugin)) { }.
-Configuration is forwarded only when needed. PAC owns platform initialization and entry/exit tracing.
-
-SDK selection: global.json does not pin a version, so dotnet uses the latest installed SDK. CI installs the latest stable SDK. This does not change the plugin target framework (net462).
-
-The folder responsibilities and naming decisions are documented in docs/Structure.md.
+The execution API builds on ideas from
+[CrmBasePluginFramework](https://github.com/Dominik-Wesolowski/CrmBasePluginFramework).
+Its retained license notice is in [THIRD-PARTY-NOTICES.txt](THIRD-PARTY-NOTICES.txt).
+The Microsoft runtime and Sparkle registration source retain their original notices.

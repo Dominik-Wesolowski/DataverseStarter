@@ -1,120 +1,118 @@
 {
-  "$schema": "https://json.schemastore.org/template",
-  "author": "Dominik",
-  "classifications": [
-    "Dataverse",
-    "CRM",
-    "Plugins"
-  ],
-  "identity": "DataverseStarter.Template",
-  "name": "Dataverse Starter",
-  "shortName": "dataverse-starter",
-  "description": "Dataverse Starter with PAC-generated runtime, Sparkle, DI, typed plugin context and ILRepack.",
-  "sourceName": "Company.Crm",
-  "preferNameDirectory": true,
-  "tags": {
-    "language": "C#",
-    "type": "solution"
-  },
-  "guids": [
-    "827E0CD3-B72D-47B6-A68D-7590B98EB39B",
-    "D1B3E6E3-C0D2-4262-BD26-44F5138ADD77",
-    "AF8BBE18-5052-4142-AB8C-07E586CBE0C4",
-    "35FAB153-9759-4B5F-9336-F417AF108EAC",
-    "0AB3BF05-4346-4AA6-1389-037BE0695223",
-    "874D5F95-A537-4DD8-8F30-A7D649F7DEC7",
-    "25AEF061-04E3-49AE-B6DA-800D0A9E09BE"
-  ],
-  "symbols": {
-    "includeAccountExample": {
-      "type": "parameter",
-      "datatype": "bool",
-      "defaultValue": "false",
-      "displayName": "Include Account example",
-      "description": "Include Account plugins, services, repositories, tests and a minimal OOTB model. PAC can overwrite the sample model later."
-    },
-    "solutionName": {
-      "type": "derived",
-      "valueSource": "name",
-      "valueTransform": "identity",
-      "replaces": "DataverseStarter",
-      "fileRename": "DataverseStarter"
-    }
-  },
-  "sources": [
-    {
-      "modifiers": [
-        {
-          "exclude": [
-            "**/bin/**",
-            "**/obj/**",
-            "**/node_modules/**",
-            "**/packages/**",
-            "**/local-feed/**",
-            ".git/**",
-            ".vs/**",
-            ".idea/**",
-            ".codex/**",
-            ".agents/**",
-            "artifacts/**",
-            "**/*.snk",
-            "**/*.pfx",
-            "**/*.p12",
-            "**/*.user",
-            "**/*.suo",
-            "**/*.binlog",
-            "**/*.log",
-            "**/TestResults/**",
-            "**/coverage/**",
-            "**/*.local.json",
-            "**/*.local.props",
-            ".env",
-            ".env.*",
-            "src/Company.Crm.EarlyBound/Generated/**",
-            "src/Company.Crm.Plugins/Shared/Generated/**",
-            "docs/Audit.md",
-            "docs/TemplateAuthoring.md",
-            "scripts/TestTemplate.ps1"
-          ]
-        },
-        {
-          "condition": "(!includeAccountExample)",
-          "exclude": [
-            "src/Company.Crm.Application/Entities/Accounts/**",
-            "src/Company.Crm.Plugins/Entities/Accounts/**",
-            "tests/Company.Crm.Application.Tests/Entities/Accounts/**",
-            "tests/Company.Crm.Plugins.Tests/Entities/Accounts/**"
-          ]
-        }
-      ],
-      "copyOnly": [
-        "src/Company.Crm.Plugins/Shared/Registration/CrmPluginRegistrationAttribute.cs"
-      ]
-    },
-    {
-      "source": "src/Company.Crm.EarlyBound/Generated/Entities",
-      "target": "src/Company.Crm.EarlyBound/Generated/Entities",
-      "include": [
-        "account.cs"
-      ],
-      "condition": "includeAccountExample"
-    }
-  ],
-  "primaryOutputs": [
-    {
-      "path": "DataverseStarter.sln"
-    }
-  ],
-  "postActions": [
-    {
-      "description": "Initialize the backend locally (no CRM connection required).",
-      "manualInstructions": [
-        {
-          "text": "Run npm run setup, then npm run check. The optional Account example includes a minimal test model; npm run model:generate later replaces it using the target PAC environment."
-        }
-      ],
-      "actionId": "AC1156F7-BB77-4DB8-B28F-24EEBCCA1E5C",
-      "continueOnError": true
-    }
-  ]
+    "$schema":  "https://json.schemastore.org/template",
+    "author":  "Dominik",
+    "classifications":  [
+                            "Dataverse",
+                            "CRM",
+                            "Plugins"
+                        ],
+    "identity":  "DataverseStarter.Template",
+    "name":  "Dataverse Starter",
+    "shortName":  "dataverse-starter",
+    "description":  "Dataverse Starter with PAC-generated runtime, Sparkle, DI, typed plugin context and ILRepack.",
+    "sourceName":  "Company.Crm",
+    "preferNameDirectory":  true,
+    "tags":  {
+                 "language":  "C#",
+                 "type":  "solution"
+             },
+    "guids":  [
+                  "827E0CD3-B72D-47B6-A68D-7590B98EB39B",
+                  "D1B3E6E3-C0D2-4262-BD26-44F5138ADD77",
+                  "AF8BBE18-5052-4142-AB8C-07E586CBE0C4",
+                  "35FAB153-9759-4B5F-9336-F417AF108EAC",
+                  "0AB3BF05-4346-4AA6-1389-037BE0695223",
+                  "874D5F95-A537-4DD8-8F30-A7D649F7DEC7",
+                  "25AEF061-04E3-49AE-B6DA-800D0A9E09BE"
+              ],
+    "symbols":  {
+                    "includeAccountExample":  {
+                                                  "type":  "parameter",
+                                                  "datatype":  "bool",
+                                                  "defaultValue":  "false",
+                                                  "displayName":  "Include Account example",
+                                                  "description":  "Include Account plugins, services, repositories, tests and a minimal OOTB model. PAC can overwrite the sample model later."
+                                              },
+                    "solutionName":  {
+                                         "type":  "derived",
+                                         "valueSource":  "name",
+                                         "valueTransform":  "identity",
+                                         "replaces":  "DataverseStarter",
+                                         "fileRename":  "DataverseStarter"
+                                     }
+                },
+    "sources":  [
+                    {
+                        "modifiers":  [
+                                          {
+                                              "exclude":  [
+                                                              "**/bin/**",
+                                                              "**/obj/**",
+                                                              "**/node_modules/**",
+                                                              "**/packages/**",
+                                                              "**/local-feed/**",
+                                                              ".git/**",
+                                                              ".vs/**",
+                                                              ".idea/**",
+                                                              ".codex/**",
+                                                              ".agents/**",
+                                                              "artifacts/**",
+                                                              "**/*.snk",
+                                                              "**/*.pfx",
+                                                              "**/*.p12",
+                                                              "**/*.user",
+                                                              "**/*.suo",
+                                                              "**/*.binlog",
+                                                              "**/*.log",
+                                                              "**/TestResults/**",
+                                                              "**/coverage/**",
+                                                              "**/*.local.json",
+                                                              "**/*.local.props",
+                                                              ".env",
+                                                              ".env.*",
+                                                              "src/Company.Crm.EarlyBound/Generated/**",
+                                                              "src/Company.Crm.Plugins/Shared/Generated/**",
+                                                              "scripts/TestTemplate.ps1"
+                                                          ]
+                                          },
+                                          {
+                                              "condition":  "(!includeAccountExample)",
+                                              "exclude":  [
+                                                              "src/Company.Crm.Application/Entities/Accounts/**",
+                                                              "src/Company.Crm.Plugins/Entities/Accounts/**",
+                                                              "tests/Company.Crm.Application.Tests/Entities/Accounts/**",
+                                                              "tests/Company.Crm.Plugins.Tests/Entities/Accounts/**"
+                                                          ]
+                                          }
+                                      ],
+                        "copyOnly":  [
+                                         "src/Company.Crm.Plugins/Shared/Registration/CrmPluginRegistrationAttribute.cs"
+                                     ]
+                    },
+                    {
+                        "source":  "src/Company.Crm.EarlyBound/Generated/Entities",
+                        "target":  "src/Company.Crm.EarlyBound/Generated/Entities",
+                        "include":  [
+                                        "account.cs"
+                                    ],
+                        "condition":  "includeAccountExample"
+                    }
+                ],
+    "primaryOutputs":  [
+                           {
+                               "path":  "DataverseStarter.sln"
+                           }
+                       ],
+    "postActions":  [
+                        {
+                            "description":  "Initialize the backend locally (no CRM connection required).",
+                            "manualInstructions":  [
+                                                       {
+                                                           "text":  "Run npm run setup, then npm run check. The optional Account example includes a minimal test model; npm run model:generate later replaces it using the target PAC environment."
+                                                       }
+                                                   ],
+                            "actionId":  "AC1156F7-BB77-4DB8-B28F-24EEBCCA1E5C",
+                            "continueOnError":  true
+                        }
+                    ]
 }
